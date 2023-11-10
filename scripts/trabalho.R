@@ -75,6 +75,12 @@ df$Tipo_avaria <- factor(df$Tipo_avaria)
 df$Descrição_tipo_avaria <- factor(df$Descrição_tipo_avaria)
 df$Prateleira <- factor(df$Prateleira)
 
+df <- df |>
+  mutate(Descrição_avaria = case_when(
+    Descrição_avaria == "Sem Avaria" ~ "Sem avaria",
+    Descrição_avaria == "Sem avaria" ~ "Sem avaria",
+    Descrição_avaria == "Avaria" ~ "Avaria"))
+
 # Exportando ----
 
 write.xlsx(df,"banco/grupo3.xlsx")
