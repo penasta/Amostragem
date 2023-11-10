@@ -106,6 +106,32 @@ ggplot(contagem) +
     color = "black"
   )
 
+# 2.0.6 Proporção tipo de avaria - tirando "sem avaria" ----
+contagem3 <- df %>%
+  na.omit() %>%
+  group_by(Descrição_tipo_avaria) %>%
+  summarise(Freq = n()) %>%
+  mutate(Prop = round(100 * (Freq / sum(Freq)), 2)) %>%
+  arrange(desc(Descrição_tipo_avaria)) %>%
+  mutate(posicao = cumsum(Prop) - 0.5 * Prop,
+         ymax = cumsum(Prop),
+         ymin = c(0, head(ymax, n=-1)))
+
+ggplot(contagem3) +
+  aes(
+    x = factor(""),
+    y = Prop,
+    fill = factor(Descrição_tipo_avaria)
+  ) +
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") +
+  scale_fill_manual(values = cores_unb,name = "Descrição tipo avaria") +
+  theme_void() +
+  geom_text(
+    aes(x = 1.8, y = posicao, label = paste0(Prop, "%")),
+    color = "black"
+  )
+
 
 # 2.1 Proporção estimada na população, com intervalo de confiança; estatística pontual e erro padrão. ----
 p_load(samplingbook)
