@@ -52,6 +52,8 @@ df %>%
   scale_fill_manual(values = cores_unb)+
   labs(x = "Tipo de avaria", y = "Frequência") +
   theme_minimal()
+#ggsave("resultados/grafico1.pdf", width = 158, height = 93, units = "mm")
+
 
 # 2.0.4 Proporção avaria ----
 
@@ -79,6 +81,8 @@ ggplot(contagem2) +
     aes(x = 1.8, y = posicao, label = paste0(Prop, "%")),
     color = "black"
   )
+#ggsave("resultados/grafico2.pdf", width = 158, height = 93, units = "mm")
+
 
 # 2.0.5 Proporção tipo de avaria ----
 contagem <- df %>%
@@ -105,6 +109,7 @@ ggplot(contagem) +
     aes(x = 1.8, y = posicao, label = paste0(Prop, "%")),
     color = "black"
   )
+#ggsave("resultados/grafico3.pdf", width = 158, height = 93, units = "mm")
 
 # 2.0.6 Proporção tipo de avaria - tirando "sem avaria" ----
 contagem3 <- df %>%
@@ -131,6 +136,7 @@ ggplot(contagem3) +
     aes(x = 1.8, y = posicao, label = paste0(Prop, "%")),
     color = "black"
   )
+#ggsave("resultados/grafico4.pdf", width = 158, height = 93, units = "mm")
 
 
 # 2.1 Proporção estimada na população, com intervalo de confiança; estatística pontual e erro padrão. ----
@@ -145,8 +151,37 @@ Sprop(y=df$Avaria,N=197+2*1500)
 summary(aov(Avaria ~ Tipo_avaria + Prateleira,data=df)) # Não significativo
 
 # 2.2.2 Verificando se a avaria pode ser explicada por qual prateleira o livro foi coletado ----
+df %>%
+  select(Descrição_avaria, Prateleira) %>%
+  group_by(Descrição_avaria, Prateleira) %>%
+  summarise(freq = n()) %>%
+  mutate(
+    freq_relativa = freq %>% percent(),
+    porcentagens = str_c(freq_relativa, "%") %>% str_replace("\\.", ","),
+    legendas = str_squish(str_c(freq, " (", porcentagens, ")"))
+  ) %>%
+  ggplot() +
+  aes(
+    x = fct_reorder(factor(Prateleira), freq, .desc = T),
+    y = freq,
+    fill = Descrição_avaria,
+    label = legendas
+  ) +
+  labs(fill='')  +
+  geom_col(position = position_dodge2(preserve = "single", padding = 0)) +
+  geom_text(
+    position = position_dodge(width = .9),
+    vjust = -0.5, hjust = 0.5,
+    size = 2) +
+  scale_fill_manual(values = cores_unb)+
+  labs(x = "Prateleira", y = "Frequência") +
+  theme_minimal()
+#ggsave("resultados/grafico5.pdf", width = 158, height = 93, units = "mm")
+
+
 anova = aov(Avaria ~ Prateleira,data=df)
 summary(anova) # O teste anova indica que a prateleira em que o livro foi encontrado pode explicar o tipo de avaria.
+xtable(summary(anova))
 # Pressupostos do teste
 
 # 2.2.2.1 Normalidade dos resíduos ----
@@ -154,15 +189,42 @@ shapiro.test(anova$residuals) # Não são normais
 qqnorm(anova$residuals)
 qqline(anova$residuals)
 
+ggplot(anova, aes(sample=.resid)) +
+  stat_qq(colour=cores_unb[1], size = 2) +
+  stat_qq_line(size = 0.8, colour = cores_unb[2]) +
+  labs(x="Quantis da Normal", y="Quantis amostrais", title = "Normalidade") 
+#ggsave("resultados/grafico6.pdf", width = 158, height = 93, units = "mm")
+
+
+
 # 2.2.2.2 Independência ----
 plot(anova$residuals)
 plot(anova$residuals~anova$fitted.values)
 # Não aparentam ser independentes
 
+ggplot(anova, aes(x=c(1:length(anova$residuals)),y=.resid)) +
+  geom_point(colour=cores_unb[1], size=3) +
+  geom_hline(yintercept=0,colour=cores_unb[2]) +
+  labs(x="", y="Resíduos", title = "Independência") 
+#ggsave("resultados/grafico7.pdf", width = 158, height = 93, units = "mm")
+
 # 2.2.2.3 Homocedasticidade ----
 pacman::p_load(car)
 leveneTest(y=df$Avaria,group=df$Prateleira)
 # Variâncias homogêneas.
+
+dados <- data.frame(1:980)
+dados$residuos <- modelo2$residuals
+dados$valorajustado <- modelo2$fitted.values
+
+ggplot(data = data.frame(fitted.values = valores_ajustados, residuos = residuos),
+       mapping = aes(x = valores_ajustados, y = residuos)) +
+  geom_point(colour=cores_unb[1], size=3) +
+  scale_x_continuous() +
+  labs(x="Valor Ajustado",
+       y="Resíduos", title = "Homocedasticidade") 
+#ggsave("resultados/grafico8.pdf", width = 158, height = 93, units = "mm")
+
 
 # 2.2.3 Teste não paramétrico - Kruskall-Wallis ----
 kruskal.test(Avaria ~ Prateleira,data=df) # Pelo teste não paramétrico de Kruskall-Wallis, concluímos que existem diferenças entre a quantidade de avarias nas prateleiras.
@@ -196,6 +258,7 @@ ggplot(as.data.frame(prop),
                      name = NULL,
                      breaks = NULL) +
   theme_minimal()
+#ggsave("resultados/grafico9.pdf", width = 158, height = 93, units = "mm")
 
 
 # 2.2.6 Diagrama de Sankey: Tipo de avaria por cada prateleira ----
