@@ -23,7 +23,7 @@ p_load(xtable)
 xtable(df)
 
 # 2.0.2 Tabela de contingência do tipo de avaria pela prateleira - LaTeX ----
-xtable(table(df$Descrição_tipo_avaria,df$Prateleira))
+table(df$Descrição_tipo_avaria,df$Prateleira)
 
 # 2.0.3 Gráfico: Tipo de avaria pela prateleira ----
 df$Descrição_tipo_avaria <- as.character(df$Descrição_tipo_avaria)
@@ -213,9 +213,8 @@ pacman::p_load(car)
 leveneTest(y=df$Avaria,group=df$Prateleira)
 # Variâncias homogêneas.
 
-dados <- data.frame(1:980)
-dados$residuos <- modelo2$residuals
-dados$valorajustado <- modelo2$fitted.values
+residuos <- anova$residuals
+valores_ajustados <- anova$fitted.values
 
 ggplot(data = data.frame(fitted.values = valores_ajustados, residuos = residuos),
        mapping = aes(x = valores_ajustados, y = residuos)) +

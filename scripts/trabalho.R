@@ -10,6 +10,7 @@ guilherme <- read_excel("banco/Banco_Grupo3_Estante 3.xlsx",
                                       "numeric", "text", "skip", "text",
                                       "skip", "skip", "skip", "skip", "numeric"))
 bruno <- read_excel("banco/trabalho_amostragem_grupo3_bruno.xlsx")
+giulia <- read_excel("banco/base_giulia.xlsx")
 
 # ETL ----
 
@@ -33,6 +34,19 @@ dail[25,1] <- "Classe 2"
 dail$Prateleira <- 1
 
 # Giulia (Prateleira 2) ----
+colnames(giulia) <- c("Classe","Endereço","Exemplar","Avaria","Tipo_avaria")
+giulia <- giulia |>
+  mutate(Tipo_avaria = ifelse(Tipo_avaria == 0,NA,Tipo_avaria),
+         Descrição_avaria = case_when(
+           Avaria == "0" ~ "Sem avaria",
+           Avaria == "1" ~ "Avaria"),
+         Descrição_tipo_avaria = case_when(
+           Tipo_avaria == NA ~ NA,
+           Tipo_avaria == "1" ~ "Capa",
+           Tipo_avaria == "2" ~ "Oxidação/Costura",
+           Tipo_avaria == "3" ~ "Riscos"),
+         Prateleira = 2)
+giulia <- giulia[,c(1,2,3,4,6,5,7,8)]
 
 # Guilherme (Prateleira 3) ----
 
@@ -67,7 +81,7 @@ bruno$Prateleira <- 4
 
 # Consolidação ----
 
-df = rbind(dail,guilherme,bruno)
+df = rbind(dail,giulia,guilherme,bruno)
 df$Classe <- factor(df$Classe)
 df$Avaria <- factor(df$Avaria)
 df$Descrição_avaria <- factor(df$Descrição_avaria)
