@@ -258,27 +258,3 @@ ggplot(as.data.frame(prop),
                      breaks = NULL) +
   theme_minimal()
 #ggsave("resultados/grafico9.pdf", width = 158, height = 93, units = "mm")
-
-
-# 2.2.6 Diagrama de Sankey: Tipo de avaria por cada prateleira ----
-
-prop2 <- df |>
-  select(Descrição_tipo_avaria,Prateleira) |>
-  mutate(Descrição_tipo_avaria = ifelse(is.na(Descrição_tipo_avaria), "Sem avaria", Descrição_tipo_avaria)) %>%
-  count(Descrição_tipo_avaria, Prateleira) |>
-  mutate(proptot = prop.table(n))
-
-ggplot(as.data.frame(prop2),
-       aes(y = proptot, axis1 = factor(Descrição_tipo_avaria), axis2 = factor(Prateleira))) +
-  geom_alluvium(aes(fill = factor(Descrição_tipo_avaria)), width = 1/12,alpha=.8,show.legend = FALSE) +
-  geom_stratum(width = 1/12, fill = cores_unb[4], colour = cores_unb[3],alpha=1) +
-  geom_label(stat = "stratum", infer.label = TRUE) +
-  scale_x_discrete(limits = c("Avaria", "Prateleira"),
-                   expand = c(.05, .05),
-                   labels = c("Avaria", "Prateleira")) +
-  scale_fill_manual(values = rev(cores_unb)) +
-  scale_y_continuous(labels = NULL,
-                     name = NULL,
-                     breaks = NULL) +
-  theme_minimal()
-# ficou feio esse, não pretendo usar.
