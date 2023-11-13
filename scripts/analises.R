@@ -258,3 +258,9 @@ ggplot(as.data.frame(prop),
                      breaks = NULL) +
   theme_minimal()
 #ggsave("resultados/grafico9.pdf", width = 158, height = 93, units = "mm")
+
+# Testando proporção
+
+prop.test(sum(df$Avaria), length(df$Avaria), p = 0.5, alternative = "two.sided")
+
+
